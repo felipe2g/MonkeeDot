@@ -40,36 +40,29 @@ public class GamePanel extends JPanel implements Runnable {
 
     @Override
     public void run() {
+        //Delta Strategy to limit framerate fps
 
-        //"The sleep method to restrain fps"
-        double drawInterval = 1000000000/FPS; // 9 zeros means 1 second => 0.16666 seconds
-        double nextDrawTime = System.nanoTime() + drawInterval;
+        double drawInterval = 1000000000/FPS;
+        double delta = 0;
+        long lastTime = System.nanoTime();
+        long currentTime;
 
         while(gameThread != null) {
+            currentTime = System.nanoTime();
 
-            long currentTime = System.nanoTime();
+            delta += (currentTime - lastTime) / drawInterval;
 
-            //1 UPDATE: information such as character positions
-            update();
+            lastTime = currentTime;
 
-            //2 DRAW: draw the screen with the updated information
-            // repaint call the paintComponent method
-            repaint();
+            if(delta >=1) {
+                //1 UPDATE: information such as character positions
+                update();
 
-            //Pause the game until sleep time is over
-            try {
-                double remainingTime = nextDrawTime - System.nanoTime();
-                remainingTime = remainingTime / 1000000; //Convert to miliseconds
+                //2 DRAW: draw the screen with the updated information
+                // repaint call the paintComponent method
+                repaint();
 
-                if(remainingTime < 0) {
-                    remainingTime = 0;
-                }
-
-                Thread.sleep((long) remainingTime);
-
-                nextDrawTime += drawInterval;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                delta--;
             }
         }
     }
